@@ -129,6 +129,11 @@ def main():
 
         # Check if ball collides with the top/bottom walls and bounce it.
         if (ball_rect.bottom >= SCREEN_HEIGHT) or (ball_rect.top <= 0):
+            if ball_rect.bottom >= SCREEN_HEIGHT:
+                ball_rect.bottom = SCREEN_HEIGHT
+            elif ball_rect.top <= 0:
+                ball_rect.top = 0
+                
             ball_vel_y = ball_vel_y * -1
         
         # Check if ball collides with player paddle
@@ -142,6 +147,7 @@ def main():
 
             ball_vel_x = sqrt(((8 * sqrt(2)) ** 2) - ((ball_vel_y) ** 2))  # Adjust ball x-velocity so that ball is always fast
 
+            # If ball collides with enemy its x-velocity must become negative to reflect.
             if ball_rect.colliderect(enemy_rect):
                 ball_vel_x = ball_vel_x * -1
             # ball_vel_x *= -1
