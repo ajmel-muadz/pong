@@ -1,6 +1,7 @@
 import sys
 import random
 import pygame
+from math import sqrt
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -85,12 +86,10 @@ ball_rect = pygame.Rect((SCREEN_WIDTH // 2 - BALL_WIDTH // 2), (SCREEN_HEIGHT //
 # ------------------------------------------------------------------------------------------------------------------------------------------- #
 
 ball_vel_x_list = [8, -8]
-ball_vel_y_list = [8, -8]
 
 def main():
-    # Choose random velocities for ball in both directions.
+    # Choose random velocities for ball initially towards either the player or enemy paddle.
     ball_vel_x = random.choice(ball_vel_x_list)
-    ball_vel_y = random.choice(ball_vel_y_list)
 
     round_starts = True
 
@@ -134,14 +133,19 @@ def main():
         
         # Check if ball collides with player paddle
         if ball_rect.colliderect(player_rect) or ball_rect.colliderect(enemy_rect):
-            ball_vel_x = ball_vel_x * -1  # Ball x-velocity always reverses (constant velocity of 8)
-
             if ball_rect.colliderect(player_rect):
                 discrepancy = (ball_rect.center[1] - player_rect.center[1])
             elif ball_rect.colliderect(enemy_rect):
                 discrepancy = (ball_rect.center[1] - enemy_rect.center[1])
 
-            ball_vel_y = round((discrepancy * DISCREPANCY_CONST), 1)
+            ball_vel_y = (discrepancy * DISCREPANCY_CONST)  # Change the angle of ball based on where it hits paddle
+
+            ball_vel_x = sqrt(((8 * sqrt(2)) ** 2) - ((ball_vel_y) ** 2))  # Adjust ball x-velocity so that ball is always fast
+
+            if ball_rect.colliderect(enemy_rect):
+                ball_vel_x = ball_vel_x * -1
+            # ball_vel_x *= -1
+
             round_starts = False
 
         # Check if the ball passes either paddles (player/enemy wins).
