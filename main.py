@@ -28,6 +28,7 @@ def move_paddle(keys):
 
 def move_ball_horizontally(ball_vel_x, ball_vel_y):
     # This code randomly chooses where the ball goes to initially.
+    ball_vel_x_list = [6, -6]
     ball_vel_x = random.choice(ball_vel_x_list)
     ball_rect.x = ball_rect.x + ball_vel_x
     ball_vel_y = 0  # y-velocity is zero because to make it easier at the start of each round.
@@ -157,8 +158,6 @@ enemy_rect = pygame.Rect((SCREEN_WIDTH - PADDLE_WIDTH - 20), (SCREEN_HEIGHT // 2
 ball_rect = pygame.Rect((SCREEN_WIDTH // 2 - BALL_WIDTH // 2), (SCREEN_HEIGHT // 2 - BALL_HEIGHT // 2), BALL_WIDTH, BALL_HEIGHT)
 # ------------------------------------------------------------------------------------------------------------------------------------------- #
 
-ball_vel_x_list = [10, -10]
-
 def main():
     ball_vel_x = 0
     ball_vel_y = 0  # Initialise the y-velocity.
@@ -171,82 +170,89 @@ def main():
     enemy_score = 0
 
     run = True
+    pause = False
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pause = not pause
+
+        
+        if pause == False:
+            # Code responsible for drawing objects on the screen.
+            # --------------------------------------------------- #
+            SCREEN.fill(GREY)
+            pygame.draw.rect(SCREEN, GREEN, player_rect)
+            pygame.draw.rect(SCREEN, RED, enemy_rect)
+            pygame.draw.ellipse(SCREEN, WHITE, ball_rect)
+            # --------------------------------------------------- #
 
 
-        # Code responsible for drawing objects on the screen.
-        # --------------------------------------------------- #
-        SCREEN.fill(GREY)
-        pygame.draw.rect(SCREEN, GREEN, player_rect)
-        pygame.draw.rect(SCREEN, RED, enemy_rect)
-        pygame.draw.ellipse(SCREEN, WHITE, ball_rect)
-        # --------------------------------------------------- #
+            # Code responsible for moving the player and enemy paddles vertically.
+            # ------------------------------------------------------------------- #
+            keys = pygame.key.get_pressed()
+            move_paddle(keys)
+            # ------------------------------------------------------------------- #
 
 
-        # Code responsible for moving the player and enemy paddles vertically.
-        # ------------------------------------------------------------------- #
-        keys = pygame.key.get_pressed()
-        move_paddle(keys)
-        # ------------------------------------------------------------------- #
+            # Code responsible for moving the ball and its related physics.
+            # ------------------------------------------------------------------- #
+            if round_starts:
+                # If the round starts, the ball is moved horizontally to either paddle or player.
+                ball_vel_x, ball_vel_y = move_ball_horizontally(ball_vel_x, ball_vel_y)
+                round_starts = False
+            else:
+                # After the ball hits any paddle horizontally, it will bounce at a certain angle.
+                move_ball_at_angle(ball_vel_x, ball_vel_y)
+            # ------------------------------------------------------------------- #
 
 
-        # Code responsible for moving the ball and its related physics.
-        # ------------------------------------------------------------------- #
-        if round_starts:
-            # If the round starts, the ball is moved horizontally to either paddle or player.
-            ball_vel_x, ball_vel_y = move_ball_horizontally(ball_vel_x, ball_vel_y)
-            round_starts = False
+            # Check if ball collides with the top/bottom walls and bounce it.
+            # -------------------------------------------------------------- #
+            ball_vel_y = wall_collision(ball_vel_y)
+            # -------------------------------------------------------------- #
+
+
+            # Responsible for ball angles when colliding with player or enemy paddle.
+            # ----------------------------------------------------------------------------------------------------------------------------- #
+            if ball_rect.colliderect(player_rect) or ball_rect.colliderect(enemy_rect):
+                ball_vel_x, ball_vel_y = paddle_collision(ball_vel_x, ball_vel_y)
+                round_starts = False
+            # ----------------------------------------------------------------------------------------------------------------------------- #
+
+
+            # Check if the ball passes either paddles (player/enemy wins).
+            # ------------------------------------------------------------ #
+            player_win = check_player_win()
+            enemy_win = check_enemy_win()
+            # ------------------------------------------------------------ #
+
+
+            # Code responsible for the player and enemy scores.
+            # ------------------------------------------------- #
+            display_player_score(player_score)
+            display_enemy_score(enemy_score)
+            # ------------------------------------------------- #
+
+
+            # Code executed if either player or enemy wins
+            # ------------------------------------------------------- #
+            if player_win or enemy_win:
+                if player_win:
+                    player_score = player_score + 1
+                elif enemy_win:
+                    enemy_score = enemy_score + 1
+
+                reset_player_pos()
+                reset_enemy_pos()
+                reset_ball_pos()
+
+                round_starts = True
+            # ------------------------------------------------------- #
         else:
-            # After the ball hits any paddle horizontally, it will bounce at a certain angle.
-            move_ball_at_angle(ball_vel_x, ball_vel_y)
-        # ------------------------------------------------------------------- #
-
-
-        # Check if ball collides with the top/bottom walls and bounce it.
-        # -------------------------------------------------------------- #
-        ball_vel_y = wall_collision(ball_vel_y)
-        # -------------------------------------------------------------- #
-
-
-        # Responsible for ball angles when colliding with player or enemy paddle.
-        # ----------------------------------------------------------------------------------------------------------------------------- #
-        if ball_rect.colliderect(player_rect) or ball_rect.colliderect(enemy_rect):
-            ball_vel_x, ball_vel_y = paddle_collision(ball_vel_x, ball_vel_y)
-            round_starts = False
-        # ----------------------------------------------------------------------------------------------------------------------------- #
-
-
-        # Check if the ball passes either paddles (player/enemy wins).
-        # ------------------------------------------------------------ #
-        player_win = check_player_win()
-        enemy_win = check_enemy_win()
-        # ------------------------------------------------------------ #
-
-
-        # Code responsible for the player and enemy scores.
-        # ------------------------------------------------- #
-        display_player_score(player_score)
-        display_enemy_score(enemy_score)
-        # ------------------------------------------------- #
-
-
-        # Code executed if either player or enemy wins
-        # ------------------------------------------------------- #
-        if player_win or enemy_win:
-            if player_win:
-                player_score = player_score + 1
-            elif enemy_win:
-                enemy_score = enemy_score + 1
-
-            reset_player_pos()
-            reset_enemy_pos()
-            reset_ball_pos()
-
-            round_starts = True
-        # ------------------------------------------------------- #
+            SCREEN.fill(WHITE)
 
         pygame.display.update()
         clock.tick(FPS)
