@@ -252,7 +252,7 @@ def main():
                 round_starts = True
             # ------------------------------------------------------- #
         else:
-            SCREEN.fill(WHITE)
+            pass
 
         pygame.display.update()
         clock.tick(FPS)
