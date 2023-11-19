@@ -43,7 +43,7 @@ def move_ball_at_angle(ball_vel_x, ball_vel_y):
 # --------------------------------------------------------------------------------- #
 
 
-# Functions concerned with checking if a paddle wins the game
+# Functions concerned with checking if a paddle wins the game. 
 # ----------------------------------------------------------------- #
 def check_player_win():
     player_win = False
@@ -61,7 +61,7 @@ def check_enemy_win():
 # ----------------------------------------------------------------- #
 
 
-# Functions concerned with resetting game state
+# Functions concerned with resetting game state.
 # ----------------------------------------------------------------- #
 def reset_player_pos():
     player_rect.left = 20
@@ -77,6 +77,8 @@ def reset_ball_pos():
 # ----------------------------------------------------------------- #
 
 
+# Functions that are concerned with ball COLLISIONS with paddles or walls.
+# ---------------------------------------------------------------------------------------------------- #
 def wall_collision(ball_vel_y):
     if (ball_rect.bottom >= SCREEN_HEIGHT) or (ball_rect.top <= 0):
 
@@ -89,6 +91,26 @@ def wall_collision(ball_vel_y):
         ball_vel_y = ball_vel_y * -1
 
     return ball_vel_y
+
+def paddle_collision(ball_vel_x, ball_vel_y):
+    if ball_rect.colliderect(player_rect):
+        discrepancy = (ball_rect.center[1] - player_rect.center[1])
+    elif ball_rect.colliderect(enemy_rect):
+        discrepancy = (ball_rect.center[1] - enemy_rect.center[1])
+
+    ball_vel_y = (discrepancy * DISCREPANCY_FACTOR)  # Change the angle of ball based on where it hits paddle
+
+    ball_vel_x = sqrt(((10 * sqrt(2)) ** 2) - ((ball_vel_y) ** 2))  # Adjust ball x-velocity so that ball is always fast
+
+    # If ball collides with enemy its x-velocity must become negative to reflect.
+    if ball_rect.colliderect(enemy_rect):
+        ball_vel_x = ball_vel_x * -1
+
+    ball_velocities = (ball_vel_x, ball_vel_y)
+
+    return ball_velocities
+# ---------------------------------------------------------------------------------------------------- #
+
 
 
 # This block of code is for the screen.
@@ -113,7 +135,7 @@ WHITE = "#cacccf"
 # ------------------------------------------------------------------------------------------------------------------------------------------- #
 PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_VEL = 40, 150, 8
 BALL_WIDTH, BALL_HEIGHT = 25, 25
-DISCREPANCY_CONST = 0.125
+DISCREPANCY_FACTOR = 0.125  # Constant responsible for ball angles.
 
 player_rect = pygame.Rect(20, (SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT)
 enemy_rect = pygame.Rect((SCREEN_WIDTH - PADDLE_WIDTH - 20), (SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT)
@@ -168,33 +190,25 @@ def main():
 
 
         # Check if ball collides with the top/bottom walls and bounce it.
+        # -------------------------------------------------------------- #
         ball_vel_y = wall_collision(ball_vel_y)
+        # -------------------------------------------------------------- #
 
-        
+
         # Responsible for ball angles when colliding with player or enemy paddle.
         # ----------------------------------------------------------------------------------------------------------------------------- #
         if ball_rect.colliderect(player_rect) or ball_rect.colliderect(enemy_rect):
-            if ball_rect.colliderect(player_rect):
-                discrepancy = (ball_rect.center[1] - player_rect.center[1])
-            elif ball_rect.colliderect(enemy_rect):
-                discrepancy = (ball_rect.center[1] - enemy_rect.center[1])
-
-            ball_vel_y = (discrepancy * DISCREPANCY_CONST)  # Change the angle of ball based on where it hits paddle
-
-            ball_vel_x = sqrt(((10 * sqrt(2)) ** 2) - ((ball_vel_y) ** 2))  # Adjust ball x-velocity so that ball is always fast
-
-            # If ball collides with enemy its x-velocity must become negative to reflect.
-            if ball_rect.colliderect(enemy_rect):
-                ball_vel_x = ball_vel_x * -1
-
+            ball_vel_x, ball_vel_y = paddle_collision(ball_vel_x, ball_vel_y)
             round_starts = False
         # ----------------------------------------------------------------------------------------------------------------------------- #
+
 
         # Check if the ball passes either paddles (player/enemy wins).
         # ------------------------------------------------------------ #
         player_win = check_player_win()
         enemy_win = check_enemy_win()
         # ------------------------------------------------------------ #
+
 
         if player_win or enemy_win:
             reset_player_pos()
