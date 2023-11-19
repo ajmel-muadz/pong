@@ -112,6 +112,19 @@ def paddle_collision(ball_vel_x, ball_vel_y):
 # ---------------------------------------------------------------------------------------------------- #
 
 
+# Functions concerned with the player score.
+# ---------------------------------------------------------------------------------------------------- #
+def display_player_score(player_score):
+    score_surf = score_font.render(f"{player_score}", False, GREEN)
+    score_rect = score_surf.get_rect(center = (320, 50))
+    SCREEN.blit(score_surf, score_rect)
+
+def display_enemy_score(enemy_score):
+    score_surf = score_font.render(f"{enemy_score}", False, RED)
+    score_rect = score_surf.get_rect(center = (960, 50))
+    SCREEN.blit(score_surf, score_rect)
+# ---------------------------------------------------------------------------------------------------- #
+
 
 # This block of code is for the screen.
 # --------------------------------------------------- #
@@ -137,13 +150,14 @@ PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_VEL = 40, 150, 8
 BALL_WIDTH, BALL_HEIGHT = 25, 25
 DISCREPANCY_FACTOR = 0.125  # Constant responsible for ball angles.
 
+score_font = pygame.font.Font("GamerFont/gamer_font.ttf", 50)
+
 player_rect = pygame.Rect(20, (SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT)
 enemy_rect = pygame.Rect((SCREEN_WIDTH - PADDLE_WIDTH - 20), (SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT)
 ball_rect = pygame.Rect((SCREEN_WIDTH // 2 - BALL_WIDTH // 2), (SCREEN_HEIGHT // 2 - BALL_HEIGHT // 2), BALL_WIDTH, BALL_HEIGHT)
 # ------------------------------------------------------------------------------------------------------------------------------------------- #
 
 ball_vel_x_list = [10, -10]
-
 
 def main():
     ball_vel_x = 0
@@ -152,7 +166,9 @@ def main():
     round_starts = True
 
     player_win = False
+    player_score = 0
     enemy_win = False
+    enemy_score = 0
 
     run = True
     while run:
@@ -210,12 +226,27 @@ def main():
         # ------------------------------------------------------------ #
 
 
+        # Code responsible for the player and enemy scores.
+        # ------------------------------------------------- #
+        display_player_score(player_score)
+        display_enemy_score(enemy_score)
+        # ------------------------------------------------- #
+
+
+        # Code executed if either player or enemy wins
+        # ------------------------------------------------------- #
         if player_win or enemy_win:
+            if player_win:
+                player_score = player_score + 1
+            elif enemy_win:
+                enemy_score = enemy_score + 1
+
             reset_player_pos()
             reset_enemy_pos()
             reset_ball_pos()
 
             round_starts = True
+        # ------------------------------------------------------- #
 
         pygame.display.update()
         clock.tick(FPS)
