@@ -141,7 +141,7 @@ pygame.display.set_caption("Pong Game")
 GREY = "#363738"
 GREEN = "#7fdb98"
 RED = "#cf624c"
-WHITE = (202, 204, 207)
+WHITE = "#cacccf"
 # ------------------------------------- #
 
 
@@ -252,7 +252,7 @@ def main():
                 round_starts = True
             # ------------------------------------------------------- #
         else:
-            pass
+            SCREEN.fill(WHITE)
 
         pygame.display.update()
         clock.tick(FPS)
