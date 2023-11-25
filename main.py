@@ -127,6 +127,36 @@ def display_enemy_score(enemy_score):
 # ---------------------------------------------------------------------------------------------------- #
 
 
+# Functions concerned with the main menu.
+# ---------------------------------------------------------------------------------------------------- #
+def one_player_text():
+    text_surf = score_font.render("One Player", False, BLACK)
+    text_rect = text_surf.get_rect(midleft = (150, 350))
+
+    rect_width = text_rect.width + 20
+    rect_height = text_rect.height + 20
+
+    new_rect = pygame.Rect(text_rect.left, text_rect.top, rect_width, rect_height)
+    new_rect.center = text_rect.center
+
+    pygame.draw.rect(SCREEN, WHITE, new_rect)
+    SCREEN.blit(text_surf, text_rect)
+
+
+def two_player_text():
+    text_surf = score_font.render("Two Player", False, BLACK)
+    text_rect = text_surf.get_rect(midright = (1130, 350))
+
+    rect_width = text_rect.width + 20
+    rect_height = text_rect.height + 20
+
+    new_rect = pygame.Rect(text_rect.left, text_rect.top, rect_width, rect_height)
+    new_rect.center = text_rect.center
+
+    pygame.draw.rect(SCREEN, WHITE, new_rect)
+    SCREEN.blit(text_surf, text_rect)
+
+
 # This block of code is for the screen.
 # --------------------------------------------------- #
 FPS = 60
@@ -141,7 +171,10 @@ pygame.display.set_caption("Pong Game")
 GREY = "#363738"
 GREEN = "#7fdb98"
 RED = "#cf624c"
-WHITE = "#cacccf"
+PEARL_WHITE = "#cacccf"
+WHITE = "#f5f5f5"
+TURQUOISE = "#64c5e8"
+BLACK = "#000000"
 # ------------------------------------- #
 
 
@@ -169,9 +202,31 @@ def main():
     enemy_win = False
     enemy_score = 0
 
-    run = True
+    menu_runs = True  # Boolean that controls the main menu loop.
+    game_runs = True  # Boolean that controls the main game loop.
     pause = False
-    while run:
+
+    # Main menu loop.
+    while menu_runs:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+        # Background colour of the main menu.
+        SCREEN.fill(TURQUOISE)
+        # Display the option for one player
+        one_player_text()
+        # Display the option for two player
+        two_player_text()
+        # Draw a line in the middle of the screen
+        pygame.draw.rect(SCREEN, BLACK, (640,0,10,1000))
+        
+        pygame.display.update()
+        clock.tick(FPS)
+
+
+    # Main game loop.
+    while game_runs:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -179,14 +234,14 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     pause = not pause
 
-        
+        # If pause == False means if the player did not click 'ESC' to pause the game.
         if pause == False:
             # Code responsible for drawing objects on the screen.
             # --------------------------------------------------- #
             SCREEN.fill(GREY)
             pygame.draw.rect(SCREEN, GREEN, player_rect)
             pygame.draw.rect(SCREEN, RED, enemy_rect)
-            pygame.draw.ellipse(SCREEN, WHITE, ball_rect)
+            pygame.draw.ellipse(SCREEN, PEARL_WHITE, ball_rect)
             # --------------------------------------------------- #
 
 
