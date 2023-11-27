@@ -6,25 +6,29 @@ from math import sqrt
 pygame.init()
 clock = pygame.time.Clock()
 
-
 # Functions concerned with MOVING anything.
 # --------------------------------------------------------------------------------- #
-def move_paddle(keys):
-    # Move the player.
-    # -------------------------------------- #
+def move_player_paddle(keys):
     if keys[pygame.K_s] and player_rect.bottom <= SCREEN_HEIGHT:
         player_rect.y = player_rect.y + PADDLE_VEL
     if keys[pygame.K_w] and player_rect.top >= 0:
         player_rect.y = player_rect.y - PADDLE_VEL
-    # -------------------------------------- #
 
-    # Move the enemy.
-    # -------------------------------------- #
-    if keys[pygame.K_DOWN] and enemy_rect.bottom <= SCREEN_HEIGHT:         
+def move_second_paddle(single_player_chosen, two_player_chosen):
+    if single_player_chosen:
+        single_player()
+    elif two_player_chosen:
+        two_player()
+
+def single_player():
+    pass
+
+def two_player():
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_DOWN] and enemy_rect.bottom <= SCREEN_HEIGHT:
         enemy_rect.y = enemy_rect.y + PADDLE_VEL
-    if keys[pygame.K_UP] and enemy_rect.top >= 0:                   
-        enemy_rect.y = enemy_rect.y - PADDLE_VEL                
-    # -------------------------------------- #
+    if keys[pygame.K_UP] and enemy_rect.top >= 0:
+        enemy_rect.y = enemy_rect.y - PADDLE_VEL
 
 def move_ball_horizontally(ball_vel_x, ball_vel_y):
     # This code randomly chooses where the ball goes to initially.
@@ -82,7 +86,6 @@ def reset_ball_pos():
 # ---------------------------------------------------------------------------------------------------- #
 def wall_collision(ball_vel_y):
     if (ball_rect.bottom >= SCREEN_HEIGHT) or (ball_rect.top <= 0):
-
         # In case ball bottom/top exceeds the screen, place it so that it can bounce correctly.
         if ball_rect.bottom >= SCREEN_HEIGHT:
             ball_rect.bottom = SCREEN_HEIGHT
@@ -94,12 +97,14 @@ def wall_collision(ball_vel_y):
     return ball_vel_y
 
 def paddle_collision(ball_vel_x, ball_vel_y):
+    # NOTE: The ball's speed when facing any direction is sqrt(200)
+
     if ball_rect.colliderect(player_rect):
         discrepancy = (ball_rect.center[1] - player_rect.center[1])
     elif ball_rect.colliderect(enemy_rect):
         discrepancy = (ball_rect.center[1] - enemy_rect.center[1])
 
-    ball_vel_y = (discrepancy * DISCREPANCY_FACTOR)  # Change the angle of ball based on where it hits paddle
+    ball_vel_y = (discrepancy * ANGLE_FACTOR)  # Change the angle of ball based on where it hits paddle
 
     ball_vel_x = sqrt(((10 * sqrt(2)) ** 2) - ((ball_vel_y) ** 2))  # Adjust ball x-velocity so that ball is always fast
 
@@ -211,7 +216,7 @@ BLACK = "#000000"
 # ------------------------------------------------------------------------------------------------------------------------------------------- #
 PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_VEL = 40, 150, 8
 BALL_WIDTH, BALL_HEIGHT = 25, 25
-DISCREPANCY_FACTOR = 0.125  # Constant responsible for ball angles.
+ANGLE_FACTOR = 0.125  # Constant responsible for ball angles.
 
 DIVIDER_WIDTH = 10
 
@@ -241,6 +246,9 @@ def main():
     game_runs = True  # Boolean that controls the main game loop.
     pause = False
 
+    single_player_chosen = False
+    two_player_chosen = False
+
     # Main menu loop.
     # ------------------------------------------------------------------------------------------------ #
     while menu_runs:
@@ -252,10 +260,12 @@ def main():
 
                 if mouse_pos_in(one_player_text(), pos):
                     if pygame.mouse.get_pressed()[0]:
+                        single_player_chosen = True
                         menu_runs = False
                 
                 if mouse_pos_in(two_player_text(), pos):
                     if pygame.mouse.get_pressed()[0]:
+                        two_player_chosen = True
                         menu_runs = False
 
         # Background colour of the main menu.
@@ -318,7 +328,8 @@ def main():
             # Code responsible for moving the player and enemy paddles vertically.
             # ------------------------------------------------------------------- #
             keys = pygame.key.get_pressed()
-            move_paddle(keys)
+            move_player_paddle(keys)
+            move_second_paddle(single_player_chosen, two_player_chosen)
             # ------------------------------------------------------------------- #
 
 
