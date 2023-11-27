@@ -127,34 +127,63 @@ def display_enemy_score(enemy_score):
 # ---------------------------------------------------------------------------------------------------- #
 
 
-# Functions concerned with the main menu.
+# Functions concerned with the main and pause menu.
 # ---------------------------------------------------------------------------------------------------- #
-def one_player_text():
-    text_surf = score_font.render("One Player", False, BLACK)
-    text_rect = text_surf.get_rect(midleft = (150, 350))
+def button_rect(text, position):
+    text_surf = score_font.render(text, False, BLACK)
+    text_rect = text_surf.get_rect(center = position)
 
     rect_width = text_rect.width + 20
     rect_height = text_rect.height + 20
 
-    new_rect = pygame.Rect(text_rect.left, text_rect.top, rect_width, rect_height)
-    new_rect.center = text_rect.center
+    bg_rect = pygame.Rect(text_rect.left, text_rect.top, rect_width, rect_height)
+    bg_rect.center = text_rect.center
 
-    pygame.draw.rect(SCREEN, WHITE, new_rect)
+    pygame.draw.rect(SCREEN, WHITE, bg_rect)
     SCREEN.blit(text_surf, text_rect)
 
+    return bg_rect
+
+def one_player_text():
+    bg_rect = button_rect("One Player", (SCREEN_WIDTH * 0.25, SCREEN_HEIGHT // 2))
+
+    return bg_rect
 
 def two_player_text():
-    text_surf = score_font.render("Two Player", False, BLACK)
-    text_rect = text_surf.get_rect(midright = (1130, 350))
+    bg_rect = button_rect("Two Player", (SCREEN_WIDTH * 0.75, SCREEN_HEIGHT // 2))
 
-    rect_width = text_rect.width + 20
-    rect_height = text_rect.height + 20
+    return bg_rect
 
-    new_rect = pygame.Rect(text_rect.left, text_rect.top, rect_width, rect_height)
-    new_rect.center = text_rect.center
+def divider_line():
+    divider_rect = pygame.Rect(SCREEN_WIDTH // 2, 0, DIVIDER_WIDTH, SCREEN_HEIGHT)
+    pygame.draw.rect(SCREEN, BLACK, divider_rect)
 
-    pygame.draw.rect(SCREEN, WHITE, new_rect)
-    SCREEN.blit(text_surf, text_rect)
+def pause_bg():
+    pause_bg_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+    pygame.draw.rect(SCREEN, TURQUOISE, pause_bg_rect)
+
+def resume_button():
+    bg_rect = button_rect("RESUME", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
+
+    return bg_rect
+
+def restart_button():
+    bg_rect = button_rect("RESTART", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+
+    return bg_rect
+
+def quit_button():
+    bg_rect = button_rect("QUIT", (SCREEN_WIDTH // 2, SCREEN_HEIGHT * 3 // 4))
+    
+    return bg_rect
+
+def mouse_pos_in(rect, pos):
+    mouse_in_rect = False
+    if (pos[0] >= rect.left and pos[0] <= rect.right) and (pos[1] >= rect.top and pos[1] <= rect.bottom):
+        mouse_in_rect = True
+
+    return mouse_in_rect
+# ---------------------------------------------------------------------------------------------------- #
 
 
 # This block of code is for the screen.
@@ -184,6 +213,8 @@ PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_VEL = 40, 150, 8
 BALL_WIDTH, BALL_HEIGHT = 25, 25
 DISCREPANCY_FACTOR = 0.125  # Constant responsible for ball angles.
 
+DIVIDER_WIDTH = 10
+
 score_font = pygame.font.Font("GamerFont/gamer_font.ttf", 50)
 
 player_rect = pygame.Rect(20, (SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT)
@@ -192,6 +223,10 @@ ball_rect = pygame.Rect((SCREEN_WIDTH // 2 - BALL_WIDTH // 2), (SCREEN_HEIGHT //
 # ------------------------------------------------------------------------------------------------------------------------------------------- #
 
 def main():
+    reset_player_pos()
+    reset_enemy_pos()
+    reset_ball_pos()
+
     ball_vel_x = 0
     ball_vel_y = 0  # Initialise the y-velocity.
 
@@ -207,10 +242,21 @@ def main():
     pause = False
 
     # Main menu loop.
+    # ------------------------------------------------------------------------------------------------ #
     while menu_runs:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+
+                if mouse_pos_in(one_player_text(), pos):
+                    if pygame.mouse.get_pressed()[0]:
+                        menu_runs = False
+                
+                if mouse_pos_in(two_player_text(), pos):
+                    if pygame.mouse.get_pressed()[0]:
+                        menu_runs = False
 
         # Background colour of the main menu.
         SCREEN.fill(TURQUOISE)
@@ -218,14 +264,16 @@ def main():
         one_player_text()
         # Display the option for two player
         two_player_text()
-        # Draw a line in the middle of the screen
-        pygame.draw.rect(SCREEN, BLACK, (640,0,10,1000))
+        # Draw a divider line in the middle of the screen
+        divider_line()
         
         pygame.display.update()
         clock.tick(FPS)
+    # ------------------------------------------------------------------------------------------------ #
 
 
     # Main game loop.
+    # ------------------------------------------------------------------------------------------------ #
     while game_runs:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -233,6 +281,28 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pause = not pause
+            elif event.type == pygame.MOUSEBUTTONDOWN and pause == True:
+                pos = pygame.mouse.get_pos()
+
+                if mouse_pos_in(resume_button(), pos):
+                    if pygame.mouse.get_pressed()[0]:
+                        pause = not pause
+
+                if mouse_pos_in(restart_button(), pos):
+                    if pygame.mouse.get_pressed()[0]:
+                        reset_player_pos()
+                        reset_enemy_pos()
+                        reset_ball_pos()
+                        player_score = 0
+                        enemy_score = 0
+                        round_starts = True
+
+                        pause = not pause
+
+                if mouse_pos_in(quit_button(), pos):
+                    if pygame.mouse.get_pressed()[0]:
+                        main()  # Calling the main function again means the whole 'game' restarts.
+
 
         # If pause == False means if the player did not click 'ESC' to pause the game.
         if pause == False:
@@ -307,10 +377,14 @@ def main():
                 round_starts = True
             # ------------------------------------------------------- #
         else:
-            pass
+            pause_bg()  # Display the colour of the pause menu background (turquoise)
+            resume_button()
+            restart_button()
+            quit_button()
 
         pygame.display.update()
         clock.tick(FPS)
+    # ------------------------------------------------------------------------------------------------ #
     
     pygame.quit()
 
