@@ -22,14 +22,17 @@ def move_second_paddle(single_player_chosen, two_player_chosen, ball_vel_y):
 
 # FINALLY MADE THE AI WORK
 def single_player(ball_vel_y):
-    if abs(ball_vel_y) < abs(PADDLE_VEL):  # The paddle follows ball speeds less than PADDLE_VEL, to eliminate stuttering/jittering
+    # NOTE: PADDLE_VEL is for hardest difficulty (8 velocity)
+
+    if abs(ball_vel_y) < abs(PADDLE_VEL):  # The paddle exactly follows ball speeds less than PADDLE_VEL, to eliminate stuttering/jittering
         enemy_rect.y = enemy_rect.y + ball_vel_y
     else:
         if ball_rect.bottom < enemy_rect.top:
-            enemy_rect.y = enemy_rect.y - PADDLE_VEL
+            enemy_rect.y = enemy_rect.y - PADDLE_VEL  # Change paddle_vel for difficulty (PADDLE_VEL is most difficult)
         if ball_rect.top > enemy_rect.bottom:
-            enemy_rect.y = enemy_rect.y + PADDLE_VEL
+            enemy_rect.y = enemy_rect.y + PADDLE_VEL  # Change paddle_vel for difficulty (PADDLE_VEL is most difficult)
 
+    # This section is responsible for not allowing the enemy paddle to exceed the screen.
     if enemy_rect.bottom > SCREEN_HEIGHT:
         enemy_rect.bottom = SCREEN_HEIGHT
     if enemy_rect.top < 0:
