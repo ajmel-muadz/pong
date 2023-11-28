@@ -227,12 +227,49 @@ def go_back():
 
     return bg_rect
 
+def back_to_menu():
+    bg_rect = button_rect("Back to Menu", (SCREEN_WIDTH // 2, SCREEN_HEIGHT * 3 // 4))
+
+    return bg_rect
+
 def mouse_pos_in(rect, pos):
     mouse_in_rect = False
     if (pos[0] >= rect.left and pos[0] <= rect.right) and (pos[1] >= rect.top and pos[1] <= rect.bottom):
         mouse_in_rect = True
 
     return mouse_in_rect
+# ---------------------------------------------------------------------------------------------------- #
+
+# Code used to display the help screen.
+# ---------------------------------------------------------------------------------------------------- #
+def display_help_screen():
+    line1_surf = smaller_score_font.render("The objective of the game is to score 5 points.", False, BLACK)
+    line1_rect = line1_surf.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
+
+    line2_surf = smaller_score_font.render("Press 'ESC' to pause the game at any point.", False, BLACK)
+    line2_rect = line2_surf.get_rect(center = (SCREEN_WIDTH // 2, (SCREEN_HEIGHT // 2) + 25))
+
+    line3_surf = smaller_score_font.render("(Click anywhere on the screen to start the game)", False, BLACK)
+    line3_rect = line3_surf.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT * 3 // 4))
+
+    SCREEN.blit(line1_surf, line1_rect)
+    SCREEN.blit(line2_surf, line2_rect)
+    SCREEN.blit(line3_surf, line3_rect)
+# ---------------------------------------------------------------------------------------------------- #
+
+# Code used to determine who wins the game.
+# ---------------------------------------------------------------------------------------------------- #
+def display_winner(player_score, enemy_score):
+    text = ""
+    if player_score == GAME_WIN_SCORE:
+        text = "Green Paddle Wins!"
+    elif enemy_score == GAME_WIN_SCORE:
+        text = "Red Paddle Wins!"
+
+    text_surf = score_font.render(text, False, BLACK)
+    text_rect = text_surf.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+
+    SCREEN.blit(text_surf, text_rect)
 # ---------------------------------------------------------------------------------------------------- #
 
 
@@ -263,9 +300,11 @@ PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_VEL = 40, 150, 8
 BALL_WIDTH, BALL_HEIGHT = 25, 25
 ANGLE_FACTOR = 0.125  # Constant responsible for ball angles.
 
+GAME_WIN_SCORE = 1
 DIVIDER_WIDTH = 10
 
 score_font = pygame.font.Font("GamerFont/gamer_font.ttf", 50)
+smaller_score_font = pygame.font.Font("GamerFont/gamer_font.ttf", 40)
 
 player_rect = pygame.Rect(20, (SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT)
 enemy_rect = pygame.Rect((SCREEN_WIDTH - PADDLE_WIDTH - 20), (SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT)
@@ -276,13 +315,14 @@ ball_rect = pygame.Rect((SCREEN_WIDTH // 2 - BALL_WIDTH // 2), (SCREEN_HEIGHT //
 # Code responsible for the game music.
 # --------------------------------------------------------------------------------------- #
 menu_music = pygame.mixer.Sound("audio/bit-shift.mp3")
-menu_music.set_volume(0.5)
+menu_music.set_volume(0.25)
 
 player_paddle_sound = pygame.mixer.Sound("audio/player_paddle_hit.wav")
 enemy_paddle_sound = pygame.mixer.Sound("audio/enemy_paddle_hit.wav")
 wall_sound = pygame.mixer.Sound("audio/wall_hit.wav")
 
 score_sound = pygame.mixer.Sound("audio/game_score.wav")
+win_music = pygame.mixer.Sound("audio/win_music.mp3")
 # --------------------------------------------------------------------------------------- #
 
 def main():
@@ -294,7 +334,9 @@ def main():
     while whole_game_runs:
         start_menu_runs = True  # Boolean that controls the main menu loop.
         difficulty_menu_runs = True  # Boolean that controls the menu for choosing difficulty.
+        help_screen = True
         game_runs = True  # Boolean that controls the main game loop.
+        game_end = True
 
         reset_player_pos()
         reset_enemy_pos()
@@ -378,7 +420,9 @@ def main():
                     elif mouse_pos_in(go_back(), pos):
                         if pygame.mouse.get_pressed()[0]:
                             difficulty_menu_runs = False
+                            help_screen = False
                             game_runs = False
+                            game_end = False
                             start_menu_runs = True
 
             # Background colour of the difficulty menu.
@@ -394,6 +438,22 @@ def main():
 
             pygame.display.update()
             clock.tick(FPS)
+
+        
+        while help_screen:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if pygame.mouse.get_pressed()[0]:
+                        help_screen = False
+
+            SCREEN.fill(TURQUOISE)
+            display_help_screen()
+
+            pygame.display.update()
+            clock.tick(FPS)
+
 
         # Main game loop.
         # ------------------------------------------------------------------------------------------------ #
@@ -510,6 +570,11 @@ def main():
                     reset_ball_pos()
 
                     round_starts = True
+
+                    if player_score == GAME_WIN_SCORE:
+                        game_runs = False
+                    elif enemy_score == GAME_WIN_SCORE:
+                        game_runs = False
                 # ------------------------------------------------------- #
             else:
                 pause_bg()  # Display the colour of the pause menu background (turquoise)
@@ -520,6 +585,29 @@ def main():
             pygame.display.update()
             clock.tick(FPS)
         # ------------------------------------------------------------------------------------------------ #
+
+        win_music_plays = 0
+        while game_end:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    pos = pygame.mouse.get_pos()
+
+                    if mouse_pos_in(back_to_menu(), pos):
+                        if pygame.mouse.get_pressed()[0]:
+                            main()
+
+            if win_music_plays == 0:
+                win_music.play()
+                win_music_plays += 1
+
+            SCREEN.fill(TURQUOISE)
+            display_winner(player_score, enemy_score)
+            back_to_menu()
+
+            pygame.display.update()
+            clock.tick(FPS)
     
     pygame.quit()
 
