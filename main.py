@@ -300,7 +300,7 @@ PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_VEL = 40, 150, 8
 BALL_WIDTH, BALL_HEIGHT = 25, 25
 ANGLE_FACTOR = 0.125  # Constant responsible for ball angles.
 
-GAME_WIN_SCORE = 1
+GAME_WIN_SCORE = 5
 DIVIDER_WIDTH = 10
 
 score_font = pygame.font.Font("GamerFont/gamer_font.ttf", 50)
