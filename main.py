@@ -268,231 +268,241 @@ menu_music.set_volume(0.5)
 # --------------------------------------------------------------------------------------- #
 
 def main():
-    reset_player_pos()
-    reset_enemy_pos()
-    reset_ball_pos()
+    menu_music_plays = 0
+    whole_game_runs = True
 
-    ball_vel_x = 0
-    ball_vel_y = 0  # Initialise the y-velocity.
-
-    round_starts = True
-
-    player_win = False
-    player_score = 0
-    enemy_win = False
-    enemy_score = 0
-
-    start_menu_runs = True  # Boolean that controls the main menu loop.
-    difficulty_menu_runs = True  # Boolean that controls the menu for choosing difficulty.
-
-    game_runs = True  # Boolean that controls the main game loop.
-    pause = False
-
-    single_player_chosen = False
-    two_player_chosen = False
-
-    easy_chosen = False
-    medium_chosen = False
-    hard_chosen = False
-
-    # Main menu loop.
+    # Whole game loop
     # ------------------------------------------------------------------------------------------------ #
-    while start_menu_runs:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
+    while whole_game_runs:
+        start_menu_runs = True  # Boolean that controls the main menu loop.
+        difficulty_menu_runs = True  # Boolean that controls the menu for choosing difficulty.
+        game_runs = True  # Boolean that controls the main game loop.
 
-                if mouse_pos_in(one_player_text(), pos):
-                    if pygame.mouse.get_pressed()[0]:
-                        single_player_chosen = True
-                        start_menu_runs = False
-                
-                elif mouse_pos_in(two_player_text(), pos):
-                    if pygame.mouse.get_pressed()[0]:
-                        two_player_chosen = True
-                        start_menu_runs = False
+        reset_player_pos()
+        reset_enemy_pos()
+        reset_ball_pos()
 
-        # Background colour of the main menu.
-        SCREEN.fill(TURQUOISE)
-        # Display the option for one player
-        one_player_text()
-        # Display the option for two player
-        two_player_text()
-        # Draw a divider line in the middle of the screen
-        divider_line()
-        
-        pygame.display.update()
-        clock.tick(FPS)
-    # ------------------------------------------------------------------------------------------------ #
+        ball_vel_x = 0
+        ball_vel_y = 0  # Initialise the y-velocity.
 
-    while difficulty_menu_runs and single_player_chosen:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
+        round_starts = True
 
-                if mouse_pos_in(easy_mode(), pos):
-                    if pygame.mouse.get_pressed()[0]:
-                        easy_chosen = True
-                        difficulty_menu_runs = False
-                
-                elif mouse_pos_in(medium_mode(), pos):
-                    if pygame.mouse.get_pressed()[0]:
-                        medium_chosen = True
-                        difficulty_menu_runs = False
+        player_win = False
+        player_score = 0
+        enemy_win = False
+        enemy_score = 0
 
-                elif mouse_pos_in(hard_mode(), pos):
-                    if pygame.mouse.get_pressed()[0]:
-                        hard_chosen = True
-                        difficulty_menu_runs = False
+        pause = False
 
-                elif mouse_pos_in(go_back(), pos):
-                    if pygame.mouse.get_pressed()[0]:
-                        main()
+        single_player_chosen = False
+        two_player_chosen = False
 
-        # Background colour of the difficulty menu.
-        SCREEN.fill(TURQUOISE)
-        # Display the option for easy mode
-        easy_mode()
-        # Display the option for medium mode
-        medium_mode()
-        # Display the option for hard mode
-        hard_mode()
-        # Display the option to go back to main menu from 'difficulty' menu
-        go_back()
+        easy_chosen = False
+        medium_chosen = False
+        hard_chosen = False
 
-        pygame.display.update()
-        clock.tick(FPS)
+        if menu_music_plays == 0:
+            menu_music.play(loops=-1)
+            menu_music_plays += 1
 
-    # Main game loop.
-    # ------------------------------------------------------------------------------------------------ #
-    while game_runs:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    pause = not pause
-            elif event.type == pygame.MOUSEBUTTONDOWN and pause == True:
-                pos = pygame.mouse.get_pos()
+        while start_menu_runs:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    pos = pygame.mouse.get_pos()
 
-                if mouse_pos_in(resume_button(), pos):
-                    if pygame.mouse.get_pressed()[0]:
-                        pause = not pause
+                    if mouse_pos_in(one_player_text(), pos):
+                        if pygame.mouse.get_pressed()[0]:
+                            single_player_chosen = True
+                            start_menu_runs = False
+                    
+                    elif mouse_pos_in(two_player_text(), pos):
+                        if pygame.mouse.get_pressed()[0]:
+                            two_player_chosen = True
+                            start_menu_runs = False
 
-                elif mouse_pos_in(restart_button(), pos):
-                    if pygame.mouse.get_pressed()[0]:
-                        reset_player_pos()
-                        reset_enemy_pos()
-                        reset_ball_pos()
-                        player_score = 0
-                        enemy_score = 0
-                        round_starts = True
-
-                        pause = not pause
-
-                elif mouse_pos_in(quit_button(), pos):
-                    if pygame.mouse.get_pressed()[0]:
-                        main()  # Calling the main function again means the whole 'game' restarts.
-
-        menu_music.stop()  # Stop menu music when game starts playing.
-
-        # If pause == False means if the player did not click 'ESC' to pause the game.
-        if pause == False:
-            # Code responsible for drawing objects on the screen.
-            # --------------------------------------------------- #
-            SCREEN.fill(GREY)
-            pygame.draw.rect(SCREEN, GREEN, player_rect)
-            pygame.draw.rect(SCREEN, RED, enemy_rect)
-            pygame.draw.ellipse(SCREEN, PEARL_WHITE, ball_rect)
-            # --------------------------------------------------- #
-
-
-            # Code responsible for moving the player and enemy paddles vertically.
-            # ------------------------------------------------------------------- #
-            keys = pygame.key.get_pressed()
-            move_player_paddle(keys)
-
-            # The difficulty chosen dictates how fast the enemy paddle is.
-            if easy_chosen:
-                enemy_vel = 6
-            elif medium_chosen:
-                enemy_vel = 8
-            elif hard_chosen:
-                enemy_vel = 10
-            else:
-                enemy_vel = 0
+            # Background colour of the main menu.
+            SCREEN.fill(TURQUOISE)
+            # Display the option for one player
+            one_player_text()
+            # Display the option for two player
+            two_player_text()
+            # Draw a divider line in the middle of the screen
+            divider_line()
             
-            move_second_paddle(single_player_chosen, two_player_chosen, ball_vel_y, enemy_vel)
-            # ------------------------------------------------------------------- #
+            pygame.display.update()
+            clock.tick(FPS)
+        # ------------------------------------------------------------------------------------------------ #
+
+        while difficulty_menu_runs and single_player_chosen:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    pos = pygame.mouse.get_pos()
+
+                    if mouse_pos_in(easy_mode(), pos):
+                        if pygame.mouse.get_pressed()[0]:
+                            easy_chosen = True
+                            difficulty_menu_runs = False
+                    
+                    elif mouse_pos_in(medium_mode(), pos):
+                        if pygame.mouse.get_pressed()[0]:
+                            medium_chosen = True
+                            difficulty_menu_runs = False
+
+                    elif mouse_pos_in(hard_mode(), pos):
+                        if pygame.mouse.get_pressed()[0]:
+                            hard_chosen = True
+                            difficulty_menu_runs = False
+
+                    elif mouse_pos_in(go_back(), pos):
+                        if pygame.mouse.get_pressed()[0]:
+                            difficulty_menu_runs = False
+                            game_runs = False
+                            start_menu_runs = True
+
+            # Background colour of the difficulty menu.
+            SCREEN.fill(TURQUOISE)
+            # Display the option for easy mode
+            easy_mode()
+            # Display the option for medium mode
+            medium_mode()
+            # Display the option for hard mode
+            hard_mode()
+            # Display the option to go back to main menu from 'difficulty' menu
+            go_back()
+
+            pygame.display.update()
+            clock.tick(FPS)
+
+        # Main game loop.
+        # ------------------------------------------------------------------------------------------------ #
+        while game_runs:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pause = not pause
+                elif event.type == pygame.MOUSEBUTTONDOWN and pause == True:
+                    pos = pygame.mouse.get_pos()
+
+                    if mouse_pos_in(resume_button(), pos):
+                        if pygame.mouse.get_pressed()[0]:
+                            pause = not pause
+
+                    elif mouse_pos_in(restart_button(), pos):
+                        if pygame.mouse.get_pressed()[0]:
+                            reset_player_pos()
+                            reset_enemy_pos()
+                            reset_ball_pos()
+                            player_score = 0
+                            enemy_score = 0
+                            round_starts = True
+
+                            pause = not pause
+
+                    elif mouse_pos_in(quit_button(), pos):
+                        if pygame.mouse.get_pressed()[0]:
+                            main()  # Calling the main function again means the whole 'game' restarts.
+
+            menu_music.stop()  # Stop menu music when game starts playing.
+
+            # If pause == False means if the player did not click 'ESC' to pause the game.
+            if pause == False:
+                # Code responsible for drawing objects on the screen.
+                # --------------------------------------------------- #
+                SCREEN.fill(GREY)
+                pygame.draw.rect(SCREEN, GREEN, player_rect)
+                pygame.draw.rect(SCREEN, RED, enemy_rect)
+                pygame.draw.ellipse(SCREEN, PEARL_WHITE, ball_rect)
+                # --------------------------------------------------- #
 
 
-            # Code responsible for moving the ball and its related physics.
-            # ------------------------------------------------------------------- #
-            if round_starts:
-                # If the round starts, the ball is moved horizontally to either paddle or player.
-                ball_vel_x, ball_vel_y = move_ball_horizontally(ball_vel_x, ball_vel_y)
-                round_starts = False
+                # Code responsible for moving the player and enemy paddles vertically.
+                # ------------------------------------------------------------------- #
+                keys = pygame.key.get_pressed()
+                move_player_paddle(keys)
+
+                # The difficulty chosen dictates how fast the enemy paddle is.
+                if easy_chosen:
+                    enemy_vel = 6
+                elif medium_chosen:
+                    enemy_vel = 8
+                elif hard_chosen:
+                    enemy_vel = 10
+                else:
+                    enemy_vel = 0
+                
+                move_second_paddle(single_player_chosen, two_player_chosen, ball_vel_y, enemy_vel)
+                # ------------------------------------------------------------------- #
+
+
+                # Code responsible for moving the ball and its related physics.
+                # ------------------------------------------------------------------- #
+                if round_starts:
+                    # If the round starts, the ball is moved horizontally to either paddle or player.
+                    ball_vel_x, ball_vel_y = move_ball_horizontally(ball_vel_x, ball_vel_y)
+                    round_starts = False
+                else:
+                    # After the ball hits any paddle horizontally, it will bounce at a certain angle.
+                    move_ball_at_angle(ball_vel_x, ball_vel_y)
+                # ------------------------------------------------------------------- #
+
+
+                # Check if ball collides with the top/bottom walls and bounce it.
+                # -------------------------------------------------------------- #
+                ball_vel_y = wall_collision(ball_vel_y)
+                # -------------------------------------------------------------- #
+
+
+                # Responsible for ball angles when colliding with player or enemy paddle.
+                # ----------------------------------------------------------------------------------------------------------------------------- #
+                if ball_rect.colliderect(player_rect) or ball_rect.colliderect(enemy_rect):
+                    ball_vel_x, ball_vel_y = paddle_collision(ball_vel_x, ball_vel_y)
+                    round_starts = False
+                # ----------------------------------------------------------------------------------------------------------------------------- #
+
+
+                # Check if the ball passes either paddles (player/enemy wins).
+                # ------------------------------------------------------------ #
+                player_win = check_player_win()
+                enemy_win = check_enemy_win()
+                # ------------------------------------------------------------ #
+
+
+                # Code responsible for the player and enemy scores.
+                # ------------------------------------------------- #
+                display_player_score(player_score)
+                display_enemy_score(enemy_score)
+                # ------------------------------------------------- #
+
+
+                # Code executed if either player or enemy wins
+                # ------------------------------------------------------- #
+                if player_win or enemy_win:
+                    if player_win:
+                        player_score = player_score + 1
+                    elif enemy_win:
+                        enemy_score = enemy_score + 1
+
+                    reset_player_pos()
+                    reset_enemy_pos()
+                    reset_ball_pos()
+
+                    round_starts = True
+                # ------------------------------------------------------- #
             else:
-                # After the ball hits any paddle horizontally, it will bounce at a certain angle.
-                move_ball_at_angle(ball_vel_x, ball_vel_y)
-            # ------------------------------------------------------------------- #
+                pause_bg()  # Display the colour of the pause menu background (turquoise)
+                resume_button()
+                restart_button()
+                quit_button()
 
-
-            # Check if ball collides with the top/bottom walls and bounce it.
-            # -------------------------------------------------------------- #
-            ball_vel_y = wall_collision(ball_vel_y)
-            # -------------------------------------------------------------- #
-
-
-            # Responsible for ball angles when colliding with player or enemy paddle.
-            # ----------------------------------------------------------------------------------------------------------------------------- #
-            if ball_rect.colliderect(player_rect) or ball_rect.colliderect(enemy_rect):
-                ball_vel_x, ball_vel_y = paddle_collision(ball_vel_x, ball_vel_y)
-                round_starts = False
-            # ----------------------------------------------------------------------------------------------------------------------------- #
-
-
-            # Check if the ball passes either paddles (player/enemy wins).
-            # ------------------------------------------------------------ #
-            player_win = check_player_win()
-            enemy_win = check_enemy_win()
-            # ------------------------------------------------------------ #
-
-
-            # Code responsible for the player and enemy scores.
-            # ------------------------------------------------- #
-            display_player_score(player_score)
-            display_enemy_score(enemy_score)
-            # ------------------------------------------------- #
-
-
-            # Code executed if either player or enemy wins
-            # ------------------------------------------------------- #
-            if player_win or enemy_win:
-                if player_win:
-                    player_score = player_score + 1
-                elif enemy_win:
-                    enemy_score = enemy_score + 1
-
-                reset_player_pos()
-                reset_enemy_pos()
-                reset_ball_pos()
-
-                round_starts = True
-            # ------------------------------------------------------- #
-        else:
-            pause_bg()  # Display the colour of the pause menu background (turquoise)
-            resume_button()
-            restart_button()
-            quit_button()
-
-        pygame.display.update()
-        clock.tick(FPS)
-    # ------------------------------------------------------------------------------------------------ #
+            pygame.display.update()
+            clock.tick(FPS)
+        # ------------------------------------------------------------------------------------------------ #
     
     pygame.quit()
 
