@@ -11,31 +11,29 @@ clock = pygame.time.Clock()
 def move_player_paddle(keys):
     if keys[pygame.K_s] and player_rect.bottom <= SCREEN_HEIGHT:
         player_rect.y = player_rect.y + PADDLE_VEL
-    if keys[pygame.K_w] and player_rect.top >= 0:
+    elif keys[pygame.K_w] and player_rect.top >= 0:
         player_rect.y = player_rect.y - PADDLE_VEL
 
-def move_second_paddle(single_player_chosen, two_player_chosen, ball_vel_y):
+def move_second_paddle(single_player_chosen, two_player_chosen, ball_vel_y, enemy_vel):
     if single_player_chosen:
-        single_player(ball_vel_y)
+        single_player(ball_vel_y, enemy_vel)
     elif two_player_chosen:
         two_player()
 
 # FINALLY MADE THE AI WORK
-def single_player(ball_vel_y):
-    # NOTE: PADDLE_VEL is for hardest difficulty (8 velocity)
-
-    if abs(ball_vel_y) < abs(PADDLE_VEL):  # The paddle exactly follows ball speeds less than PADDLE_VEL, to eliminate stuttering/jittering
+def single_player(ball_vel_y, enemy_vel):
+    if abs(ball_vel_y) < abs(enemy_vel):  # The paddle exactly follows ball speeds less than enemy_vel, to eliminate stuttering/jittering
         enemy_rect.y = enemy_rect.y + ball_vel_y
     else:
         if ball_rect.bottom < enemy_rect.top:
-            enemy_rect.y = enemy_rect.y - PADDLE_VEL  # Change paddle_vel for difficulty (PADDLE_VEL is most difficult)
-        if ball_rect.top > enemy_rect.bottom:
-            enemy_rect.y = enemy_rect.y + PADDLE_VEL  # Change paddle_vel for difficulty (PADDLE_VEL is most difficult)
+            enemy_rect.y = enemy_rect.y - enemy_vel  # enemy_vel passed determines speed of enemy paddle for determining difficulty.
+        elif ball_rect.top > enemy_rect.bottom:
+            enemy_rect.y = enemy_rect.y + enemy_vel 
 
     # This section is responsible for not allowing the enemy paddle to exceed the screen.
     if enemy_rect.bottom > SCREEN_HEIGHT:
         enemy_rect.bottom = SCREEN_HEIGHT
-    if enemy_rect.top < 0:
+    elif enemy_rect.top < 0:
         enemy_rect.top = 0
 
 def two_player():
@@ -197,6 +195,26 @@ def quit_button():
     
     return bg_rect
 
+def easy_mode():
+    bg_rect = button_rect("EASY", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
+
+    return bg_rect
+
+def medium_mode():
+    bg_rect = button_rect("MEDIUM", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+
+    return bg_rect
+
+def hard_mode():
+    bg_rect = button_rect("HARD", (SCREEN_WIDTH // 2, SCREEN_HEIGHT * 3 // 4))
+
+    return bg_rect
+
+def go_back():
+    bg_rect = button_rect("Go Back", (SCREEN_WIDTH // 10, SCREEN_HEIGHT - 45))
+
+    return bg_rect
+
 def mouse_pos_in(rect, pos):
     mouse_in_rect = False
     if (pos[0] >= rect.left and pos[0] <= rect.right) and (pos[1] >= rect.top and pos[1] <= rect.bottom):
@@ -242,6 +260,13 @@ enemy_rect = pygame.Rect((SCREEN_WIDTH - PADDLE_WIDTH - 20), (SCREEN_HEIGHT // 2
 ball_rect = pygame.Rect((SCREEN_WIDTH // 2 - BALL_WIDTH // 2), (SCREEN_HEIGHT // 2 - BALL_HEIGHT // 2), BALL_WIDTH, BALL_HEIGHT)
 # ------------------------------------------------------------------------------------------------------------------------------------------- #
 
+
+# Code responsible for the game music.
+# --------------------------------------------------------------------------------------- #
+menu_music = pygame.mixer.Sound("audio/bit-shift.mp3")
+menu_music.set_volume(0.5)
+# --------------------------------------------------------------------------------------- #
+
 def main():
     reset_player_pos()
     reset_enemy_pos()
@@ -257,16 +282,22 @@ def main():
     enemy_win = False
     enemy_score = 0
 
-    menu_runs = True  # Boolean that controls the main menu loop.
+    start_menu_runs = True  # Boolean that controls the main menu loop.
+    difficulty_menu_runs = True  # Boolean that controls the menu for choosing difficulty.
+
     game_runs = True  # Boolean that controls the main game loop.
     pause = False
 
     single_player_chosen = False
     two_player_chosen = False
 
+    easy_chosen = False
+    medium_chosen = False
+    hard_chosen = False
+
     # Main menu loop.
     # ------------------------------------------------------------------------------------------------ #
-    while menu_runs:
+    while start_menu_runs:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -276,12 +307,12 @@ def main():
                 if mouse_pos_in(one_player_text(), pos):
                     if pygame.mouse.get_pressed()[0]:
                         single_player_chosen = True
-                        menu_runs = False
+                        start_menu_runs = False
                 
-                if mouse_pos_in(two_player_text(), pos):
+                elif mouse_pos_in(two_player_text(), pos):
                     if pygame.mouse.get_pressed()[0]:
                         two_player_chosen = True
-                        menu_runs = False
+                        start_menu_runs = False
 
         # Background colour of the main menu.
         SCREEN.fill(TURQUOISE)
@@ -296,6 +327,45 @@ def main():
         clock.tick(FPS)
     # ------------------------------------------------------------------------------------------------ #
 
+    while difficulty_menu_runs and single_player_chosen:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+
+                if mouse_pos_in(easy_mode(), pos):
+                    if pygame.mouse.get_pressed()[0]:
+                        easy_chosen = True
+                        difficulty_menu_runs = False
+                
+                elif mouse_pos_in(medium_mode(), pos):
+                    if pygame.mouse.get_pressed()[0]:
+                        medium_chosen = True
+                        difficulty_menu_runs = False
+
+                elif mouse_pos_in(hard_mode(), pos):
+                    if pygame.mouse.get_pressed()[0]:
+                        hard_chosen = True
+                        difficulty_menu_runs = False
+
+                elif mouse_pos_in(go_back(), pos):
+                    if pygame.mouse.get_pressed()[0]:
+                        main()
+
+        # Background colour of the difficulty menu.
+        SCREEN.fill(TURQUOISE)
+        # Display the option for easy mode
+        easy_mode()
+        # Display the option for medium mode
+        medium_mode()
+        # Display the option for hard mode
+        hard_mode()
+        # Display the option to go back to main menu from 'difficulty' menu
+        go_back()
+
+        pygame.display.update()
+        clock.tick(FPS)
 
     # Main game loop.
     # ------------------------------------------------------------------------------------------------ #
@@ -313,7 +383,7 @@ def main():
                     if pygame.mouse.get_pressed()[0]:
                         pause = not pause
 
-                if mouse_pos_in(restart_button(), pos):
+                elif mouse_pos_in(restart_button(), pos):
                     if pygame.mouse.get_pressed()[0]:
                         reset_player_pos()
                         reset_enemy_pos()
@@ -324,10 +394,11 @@ def main():
 
                         pause = not pause
 
-                if mouse_pos_in(quit_button(), pos):
+                elif mouse_pos_in(quit_button(), pos):
                     if pygame.mouse.get_pressed()[0]:
                         main()  # Calling the main function again means the whole 'game' restarts.
 
+        menu_music.stop()  # Stop menu music when game starts playing.
 
         # If pause == False means if the player did not click 'ESC' to pause the game.
         if pause == False:
@@ -344,7 +415,18 @@ def main():
             # ------------------------------------------------------------------- #
             keys = pygame.key.get_pressed()
             move_player_paddle(keys)
-            move_second_paddle(single_player_chosen, two_player_chosen, ball_vel_y)
+
+            # The difficulty chosen dictates how fast the enemy paddle is.
+            if easy_chosen:
+                enemy_vel = 6
+            elif medium_chosen:
+                enemy_vel = 8
+            elif hard_chosen:
+                enemy_vel = 10
+            else:
+                enemy_vel = 0
+            
+            move_second_paddle(single_player_chosen, two_player_chosen, ball_vel_y, enemy_vel)
             # ------------------------------------------------------------------- #
 
 
