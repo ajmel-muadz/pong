@@ -14,21 +14,25 @@ def move_player_paddle(keys):
     if keys[pygame.K_w] and player_rect.top >= 0:
         player_rect.y = player_rect.y - PADDLE_VEL
 
-def move_second_paddle(single_player_chosen, two_player_chosen):
+def move_second_paddle(single_player_chosen, two_player_chosen, ball_vel_y):
     if single_player_chosen:
-        single_player()
+        single_player(ball_vel_y)
     elif two_player_chosen:
         two_player()
 
-def single_player():
-    if ball_rect.bottom < enemy_rect.top:
-        enemy_rect.y = enemy_rect.y - PADDLE_VEL
-    if ball_rect.top > enemy_rect.bottom:
-        enemy_rect.y = enemy_rect.y + PADDLE_VEL
+# FINALLY MADE THE AI WORK
+def single_player(ball_vel_y):
+    if abs(ball_vel_y) < abs(PADDLE_VEL):  # The paddle follows ball speeds less than PADDLE_VEL, to eliminate stuttering/jittering
+        enemy_rect.y = enemy_rect.y + ball_vel_y
+    else:
+        if ball_rect.bottom < enemy_rect.top:
+            enemy_rect.y = enemy_rect.y - PADDLE_VEL
+        if ball_rect.top > enemy_rect.bottom:
+            enemy_rect.y = enemy_rect.y + PADDLE_VEL
 
     if enemy_rect.bottom > SCREEN_HEIGHT:
         enemy_rect.bottom = SCREEN_HEIGHT
-    elif enemy_rect.top < 0:
+    if enemy_rect.top < 0:
         enemy_rect.top = 0
 
 def two_player():
@@ -337,7 +341,7 @@ def main():
             # ------------------------------------------------------------------- #
             keys = pygame.key.get_pressed()
             move_player_paddle(keys)
-            move_second_paddle(single_player_chosen, two_player_chosen)
+            move_second_paddle(single_player_chosen, two_player_chosen, ball_vel_y)
             # ------------------------------------------------------------------- #
 
 
