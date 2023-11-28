@@ -21,7 +21,15 @@ def move_second_paddle(single_player_chosen, two_player_chosen):
         two_player()
 
 def single_player():
-    pass
+    if ball_rect.bottom < enemy_rect.top:
+        enemy_rect.y = enemy_rect.y - PADDLE_VEL
+    if ball_rect.top > enemy_rect.bottom:
+        enemy_rect.y = enemy_rect.y + PADDLE_VEL
+
+    if enemy_rect.bottom > SCREEN_HEIGHT:
+        enemy_rect.bottom = SCREEN_HEIGHT
+    elif enemy_rect.top < 0:
+        enemy_rect.top = 0
 
 def two_player():
     keys = pygame.key.get_pressed()
