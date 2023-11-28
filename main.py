@@ -303,8 +303,8 @@ ANGLE_FACTOR = 0.125  # Constant responsible for ball angles.
 GAME_WIN_SCORE = 5
 DIVIDER_WIDTH = 10
 
-score_font = pygame.font.Font("GamerFont/gamer_font.ttf", 50)
-smaller_score_font = pygame.font.Font("GamerFont/gamer_font.ttf", 40)
+score_font = pygame.font.Font("fonts/gamer_font.ttf", 50)
+smaller_score_font = pygame.font.Font("fonts/gamer_font.ttf", 40)
 
 player_rect = pygame.Rect(20, (SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT)
 enemy_rect = pygame.Rect((SCREEN_WIDTH - PADDLE_WIDTH - 20), (SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT)
