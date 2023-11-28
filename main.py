@@ -65,14 +65,20 @@ def move_ball_at_angle(ball_vel_x, ball_vel_y):
 # ----------------------------------------------------------------- #
 def check_player_win():
     player_win = False
-    if ball_rect.left > (SCREEN_WIDTH + 10):
+    if ball_rect.left >= SCREEN_WIDTH and ball_rect.left <= SCREEN_WIDTH + 10:
+        score_sound.play()
+
+    if ball_rect.left > (SCREEN_WIDTH + 750):
         player_win = True
 
     return player_win
 
 def check_enemy_win():
     enemy_win = False
-    if ball_rect.right < -10:
+    if ball_rect.right <= 0 and ball_rect.right >= -10:
+        score_sound.play()
+
+    if ball_rect.right < -750:
         enemy_win = True
 
     return enemy_win
@@ -107,6 +113,10 @@ def wall_collision(ball_vel_y):
 
         ball_vel_y = ball_vel_y * -1
 
+    if (ball_rect.bottom >= SCREEN_HEIGHT) or (ball_rect.top <= 0):
+        if ball_rect.left > 0 and ball_rect.right < SCREEN_WIDTH:
+            wall_sound.play()
+
     return ball_vel_y
 
 def paddle_collision(ball_vel_x, ball_vel_y):
@@ -114,8 +124,10 @@ def paddle_collision(ball_vel_x, ball_vel_y):
 
     if ball_rect.colliderect(player_rect):
         discrepancy = (ball_rect.center[1] - player_rect.center[1])
+        player_paddle_sound.play()
     elif ball_rect.colliderect(enemy_rect):
         discrepancy = (ball_rect.center[1] - enemy_rect.center[1])
+        enemy_paddle_sound.play()
 
     ball_vel_y = (discrepancy * ANGLE_FACTOR)  # Change the angle of ball based on where it hits paddle
 
@@ -265,6 +277,12 @@ ball_rect = pygame.Rect((SCREEN_WIDTH // 2 - BALL_WIDTH // 2), (SCREEN_HEIGHT //
 # --------------------------------------------------------------------------------------- #
 menu_music = pygame.mixer.Sound("audio/bit-shift.mp3")
 menu_music.set_volume(0.5)
+
+player_paddle_sound = pygame.mixer.Sound("audio/player_paddle_hit.wav")
+enemy_paddle_sound = pygame.mixer.Sound("audio/enemy_paddle_hit.wav")
+wall_sound = pygame.mixer.Sound("audio/wall_hit.wav")
+
+score_sound = pygame.mixer.Sound("audio/game_score.wav")
 # --------------------------------------------------------------------------------------- #
 
 def main():
@@ -450,7 +468,6 @@ def main():
                     # After the ball hits any paddle horizontally, it will bounce at a certain angle.
                     move_ball_at_angle(ball_vel_x, ball_vel_y)
                 # ------------------------------------------------------------------- #
-
 
                 # Check if ball collides with the top/bottom walls and bounce it.
                 # -------------------------------------------------------------- #
