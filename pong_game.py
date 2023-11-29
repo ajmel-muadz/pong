@@ -232,6 +232,11 @@ def back_to_menu():
 
     return bg_rect
 
+def exit_game():
+    bg_rect = button_rect("EXIT GAME", (SCREEN.get_width() // 8, SCREEN.get_height() - 45))
+
+    return bg_rect
+
 def mouse_pos_in(rect, pos):
     mouse_in_rect = False
     if (pos[0] >= rect.left and pos[0] <= rect.right) and (pos[1] >= rect.top and pos[1] <= rect.bottom):
@@ -382,6 +387,10 @@ def main():
                             two_player_chosen = True
                             start_menu_runs = False
 
+                    elif mouse_pos_in(exit_game(), pos):
+                        if pygame.mouse.get_pressed()[0]:
+                            sys.exit()
+
             # Background colour of the main menu.
             SCREEN.fill(TURQUOISE)
             # Display the option for one player
@@ -390,6 +399,8 @@ def main():
             two_player_text()
             # Draw a divider line in the middle of the screen
             divider_line()
+            # Display the option to exit the game using a button
+            exit_game()
             
             pygame.display.update()
             clock.tick(FPS)
