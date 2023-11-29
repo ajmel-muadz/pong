@@ -9,7 +9,7 @@ clock = pygame.time.Clock()
 # Functions concerned with MOVING anything.
 # --------------------------------------------------------------------------------- #
 def move_player_paddle(keys):
-    if keys[pygame.K_s] and player_rect.bottom <= SCREEN_HEIGHT:
+    if keys[pygame.K_s] and player_rect.bottom <= SCREEN.get_height():
         player_rect.y = player_rect.y + PADDLE_VEL
     elif keys[pygame.K_w] and player_rect.top >= 0:
         player_rect.y = player_rect.y - PADDLE_VEL
@@ -31,14 +31,14 @@ def single_player(ball_vel_y, enemy_vel):
             enemy_rect.y = enemy_rect.y + enemy_vel 
 
     # This section is responsible for not allowing the enemy paddle to exceed the screen.
-    if enemy_rect.bottom > SCREEN_HEIGHT:
-        enemy_rect.bottom = SCREEN_HEIGHT
+    if enemy_rect.bottom > SCREEN.get_height():
+        enemy_rect.bottom = SCREEN.get_height()
     elif enemy_rect.top < 0:
         enemy_rect.top = 0
 
 def two_player():
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_DOWN] and enemy_rect.bottom <= SCREEN_HEIGHT:
+    if keys[pygame.K_DOWN] and enemy_rect.bottom <= SCREEN.get_height():
         enemy_rect.y = enemy_rect.y + PADDLE_VEL
     if keys[pygame.K_UP] and enemy_rect.top >= 0:
         enemy_rect.y = enemy_rect.y - PADDLE_VEL
@@ -65,10 +65,10 @@ def move_ball_at_angle(ball_vel_x, ball_vel_y):
 # ----------------------------------------------------------------- #
 def check_player_win():
     player_win = False
-    if ball_rect.left >= SCREEN_WIDTH and ball_rect.left <= SCREEN_WIDTH + 10:
+    if ball_rect.left >= SCREEN.get_width() and ball_rect.left <= SCREEN.get_width() + 10:
         score_sound.play()
 
-    if ball_rect.left > (SCREEN_WIDTH + 750):
+    if ball_rect.left > (SCREEN.get_width() + 750):
         player_win = True
 
     return player_win
@@ -89,32 +89,32 @@ def check_enemy_win():
 # ----------------------------------------------------------------- #
 def reset_player_pos():
     player_rect.left = 20
-    player_rect.top = (SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2)
+    player_rect.top = (SCREEN.get_height() // 2 - PADDLE_HEIGHT // 2)
 
 def reset_enemy_pos():
-    enemy_rect.left = (SCREEN_WIDTH - PADDLE_WIDTH - 20)
-    enemy_rect.top = (SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2)
+    enemy_rect.left = (SCREEN.get_width() - PADDLE_WIDTH - 20)
+    enemy_rect.top = (SCREEN.get_height() // 2 - PADDLE_HEIGHT // 2)
 
 def reset_ball_pos():
-    ball_rect.left = (SCREEN_WIDTH // 2 - BALL_WIDTH // 2)
-    ball_rect.top = (SCREEN_HEIGHT // 2 - BALL_HEIGHT // 2)
+    ball_rect.left = (SCREEN.get_width() // 2 - BALL_WIDTH // 2)
+    ball_rect.top = (SCREEN.get_height() // 2 - BALL_HEIGHT // 2)
 # ----------------------------------------------------------------- #
 
 
 # Functions that are concerned with ball COLLISIONS with paddles or walls.
 # ---------------------------------------------------------------------------------------------------- #
 def wall_collision(ball_vel_y):
-    if (ball_rect.bottom >= SCREEN_HEIGHT) or (ball_rect.top <= 0):
+    if (ball_rect.bottom >= SCREEN.get_height()) or (ball_rect.top <= 0):
         # In case ball bottom/top exceeds the screen, place it so that it can bounce correctly.
-        if ball_rect.bottom >= SCREEN_HEIGHT:
-            ball_rect.bottom = SCREEN_HEIGHT
+        if ball_rect.bottom >= SCREEN.get_height():
+            ball_rect.bottom = SCREEN.get_height()
         elif ball_rect.top <= 0:
             ball_rect.top = 0
 
         ball_vel_y = ball_vel_y * -1
 
-    if (ball_rect.bottom >= SCREEN_HEIGHT) or (ball_rect.top <= 0):
-        if ball_rect.left > 0 and ball_rect.right < SCREEN_WIDTH:
+    if (ball_rect.bottom >= SCREEN.get_height()) or (ball_rect.top <= 0):
+        if ball_rect.left > 0 and ball_rect.right < SCREEN.get_width():
             wall_sound.play()
 
     return ball_vel_y
@@ -175,60 +175,60 @@ def button_rect(text, position):
     return bg_rect
 
 def one_player_text():
-    bg_rect = button_rect("One Player", (SCREEN_WIDTH * 0.25, SCREEN_HEIGHT // 2))
+    bg_rect = button_rect("One Player", (SCREEN.get_width() * 0.25, SCREEN.get_height() // 2))
 
     return bg_rect
 
 def two_player_text():
-    bg_rect = button_rect("Two Player", (SCREEN_WIDTH * 0.75, SCREEN_HEIGHT // 2))
+    bg_rect = button_rect("Two Player", (SCREEN.get_width() * 0.75, SCREEN.get_height() // 2))
 
     return bg_rect
 
 def divider_line():
-    divider_rect = pygame.Rect(SCREEN_WIDTH // 2, 0, DIVIDER_WIDTH, SCREEN_HEIGHT)
+    divider_rect = pygame.Rect(SCREEN.get_width() // 2, 0, DIVIDER_WIDTH, SCREEN.get_height())
     pygame.draw.rect(SCREEN, BLACK, divider_rect)
 
 def pause_bg():
-    pause_bg_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+    pause_bg_rect = pygame.Rect(0, 0, SCREEN.get_width(), SCREEN.get_height())
     pygame.draw.rect(SCREEN, TURQUOISE, pause_bg_rect)
 
 def resume_button():
-    bg_rect = button_rect("RESUME", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
+    bg_rect = button_rect("RESUME", (SCREEN.get_width() // 2, SCREEN.get_height() // 4))
 
     return bg_rect
 
 def restart_button():
-    bg_rect = button_rect("RESTART", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    bg_rect = button_rect("RESTART", (SCREEN.get_width() // 2, SCREEN.get_height() // 2))
 
     return bg_rect
 
 def quit_button():
-    bg_rect = button_rect("QUIT", (SCREEN_WIDTH // 2, SCREEN_HEIGHT * 3 // 4))
+    bg_rect = button_rect("QUIT", (SCREEN.get_width() // 2, SCREEN.get_height() * 3 // 4))
     
     return bg_rect
 
 def easy_mode():
-    bg_rect = button_rect("EASY", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
+    bg_rect = button_rect("EASY", (SCREEN.get_width() // 2, SCREEN.get_height() // 4))
 
     return bg_rect
 
 def medium_mode():
-    bg_rect = button_rect("MEDIUM", (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    bg_rect = button_rect("MEDIUM", (SCREEN.get_width() // 2, SCREEN.get_height() // 2))
 
     return bg_rect
 
 def hard_mode():
-    bg_rect = button_rect("HARD", (SCREEN_WIDTH // 2, SCREEN_HEIGHT * 3 // 4))
+    bg_rect = button_rect("HARD", (SCREEN.get_width() // 2, SCREEN.get_height() * 3 // 4))
 
     return bg_rect
 
 def go_back():
-    bg_rect = button_rect("Go Back", (SCREEN_WIDTH // 10, SCREEN_HEIGHT - 45))
+    bg_rect = button_rect("Go Back", (SCREEN.get_width() // 10, SCREEN.get_height() - 45))
 
     return bg_rect
 
 def back_to_menu():
-    bg_rect = button_rect("Back to Menu", (SCREEN_WIDTH // 2, SCREEN_HEIGHT * 3 // 4))
+    bg_rect = button_rect("Back to Menu", (SCREEN.get_width() // 2, SCREEN.get_height() * 3 // 4))
 
     return bg_rect
 
@@ -244,13 +244,13 @@ def mouse_pos_in(rect, pos):
 # ---------------------------------------------------------------------------------------------------- #
 def display_help_screen():
     line1_surf = smaller_score_font.render("The objective of the game is to score 5 points.", False, BLACK)
-    line1_rect = line1_surf.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
+    line1_rect = line1_surf.get_rect(center = (SCREEN.get_width() // 2, SCREEN.get_height() // 2 - 50))
 
     line2_surf = smaller_score_font.render("Press 'ESC' to pause the game at any point.", False, BLACK)
-    line2_rect = line2_surf.get_rect(center = (SCREEN_WIDTH // 2, (SCREEN_HEIGHT // 2) + 25))
+    line2_rect = line2_surf.get_rect(center = (SCREEN.get_width() // 2, (SCREEN.get_height() // 2) + 25))
 
     line3_surf = smaller_score_font.render("(Click anywhere on the screen to start the game)", False, BLACK)
-    line3_rect = line3_surf.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT * 3 // 4))
+    line3_rect = line3_surf.get_rect(center = (SCREEN.get_width() // 2, SCREEN.get_height() * 3 // 4))
 
     SCREEN.blit(line1_surf, line1_rect)
     SCREEN.blit(line2_surf, line2_rect)
@@ -267,7 +267,7 @@ def display_winner(player_score, enemy_score):
         text = "Red Paddle Wins!"
 
     text_surf = score_font.render(text, False, BLACK)
-    text_rect = text_surf.get_rect(center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+    text_rect = text_surf.get_rect(center = (SCREEN.get_width() // 2, SCREEN.get_height() // 2))
 
     SCREEN.blit(text_surf, text_rect)
 # ---------------------------------------------------------------------------------------------------- #
@@ -277,7 +277,7 @@ def display_winner(player_score, enemy_score):
 # --------------------------------------------------- #
 FPS = 60
 SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
-SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+SCREEN = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Pong Game")
 # --------------------------------------------------- #
 
@@ -306,9 +306,9 @@ DIVIDER_WIDTH = 10
 score_font = pygame.font.Font("fonts/gamer_font.ttf", 50)
 smaller_score_font = pygame.font.Font("fonts/gamer_font.ttf", 40)
 
-player_rect = pygame.Rect(20, (SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT)
-enemy_rect = pygame.Rect((SCREEN_WIDTH - PADDLE_WIDTH - 20), (SCREEN_HEIGHT // 2 - PADDLE_HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT)
-ball_rect = pygame.Rect((SCREEN_WIDTH // 2 - BALL_WIDTH // 2), (SCREEN_HEIGHT // 2 - BALL_HEIGHT // 2), BALL_WIDTH, BALL_HEIGHT)
+player_rect = pygame.Rect(20, (SCREEN.get_height() // 2 - PADDLE_HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT)
+enemy_rect = pygame.Rect((SCREEN.get_width() - PADDLE_WIDTH - 20), (SCREEN.get_height() // 2 - PADDLE_HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT)
+ball_rect = pygame.Rect((SCREEN.get_width() // 2 - BALL_WIDTH // 2), (SCREEN.get_height() // 2 - BALL_HEIGHT // 2), BALL_WIDTH, BALL_HEIGHT)
 # ------------------------------------------------------------------------------------------------------------------------------------------- #
 
 
