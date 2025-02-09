@@ -1,5 +1,3 @@
-Hello! This is a work in progress for my Pong video game. This is my first ever major side-project that is not school-related. It is also the first project I am working on that is not a terminal program.
+Link to the game: https://ajmel-muadz.itch.io/coool-pong-game
 
-This is the classic video game 'Pong' made in Python using Pygame. This Pong game features unique ball angles when hitting the paddles.
-
-Keep an eye out for the finished product :) (I will update this terrible README soon!)
+Please note this only runs on Windows.
